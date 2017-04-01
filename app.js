@@ -1,14 +1,15 @@
 'use strict'
 
-const xhr = require('./xhr')
+const router = require('./assets/router')
+const api = require('./assets/api')
 const express = require('express')
 const app = express()
 
-app.get('/', function (req, res) {
-  let url = 'http://www.assist.org/web-assist/welcome.html'
-  xhr(url, function ($) {
-    res.send($('html > body').text())
-  })
-})
+router(app)
+api(app)
 
-app.listen(3000)
+app.use(express.static('./assets'))
+app.set('port', (process.env.PORT || 5000))
+app.listen(app.get('port'), function () {
+  console.log('uc-transfer on port', app.get('port'))
+})
