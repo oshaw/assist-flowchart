@@ -4,12 +4,22 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "test": "mocha ./app --recursive --harmony"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oshaw/uc-transfer.git"
   },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oshaw/uc-transfer/issues"
+  },
+  "homepage": "https://github.com/oshaw/uc-transfer#readme",
   "dependencies": {
     "express": "^4.15.2",
+    "mocha": "^3.2.0",
     "request": "^2.81.0"
   }
 }
