@@ -19,6 +19,7 @@
   "homepage": "https://github.com/oshaw/assist-client#readme",
   "dependencies": {
     "express": "^4.15.2",
+    "jade": "^1.11.0",
     "mocha": "^3.2.0",
     "path.join": "^1.0.0",
     "request": "^2.81.0"

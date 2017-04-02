@@ -9,11 +9,22 @@ let addYears = function (years) {
     document.body.appendChild(button)
   }
 }
-let addDestinations = function (destinations) {
+let addDestinations = function (origin, destinations) {
   for (let destination of destinations) {
     let button = document.createElement('p')
+    let click = function (element, origin, destination) {
+      element.addEventListener('click', function () {
+        let req = new XMLHttpRequest()
+        req.open('GET', '/?from=' + origin.path + '&to=' + destination.path, true)
+        req.onload = function () {
+          document.body.innerHTML = ''
+        }
+        req.send()
+      })
+    }
     button.textContent = destination.name
     button.style.display = 'block'
+    click(button, origin, destination)
     document.body.appendChild(button)
   }
 }
@@ -26,7 +37,10 @@ let addOrigins = function (origins) {
         req.open('GET', '/institutions/' + path + '.json', true)
         req.onload = function () {
           document.body.innerHTML = ''
-          addDestinations(JSON.parse(req.responseText).destinations)
+          addDestinations(
+            { name: name, path: path },
+            JSON.parse(req.responseText).destinations
+          )
           addYears(JSON.parse(req.responseText).years)
         }
         req.send()
