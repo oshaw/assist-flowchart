@@ -3,7 +3,19 @@
 
 let addInstitutions = function (institutions) {
   for (var institution of institutions) {
-    console.log(institution.name + ' ' + institution.path)
+    let button = document.createElement('a')
+    let click = function (element, name, path) {
+      element.addEventListener('click', function () {
+        let req = new XMLHttpRequest()
+        req.open('GET', '/institutions/' + path + '.json', true)
+        req.onload = function () { console.log(req.responseText) }
+        req.send()
+      })
+    }
+    button.textContent = institution.name
+    button.style.display = 'block'
+    click(button, institution.name, institution.path)
+    document.body.appendChild(button)
   }
 }
 
