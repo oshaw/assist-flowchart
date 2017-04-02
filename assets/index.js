@@ -1,27 +1,47 @@
 'use strict'
 /* global XMLHttpRequest */
 
-let addInstitutions = function (institutions) {
-  for (var institution of institutions) {
-    let button = document.createElement('a')
+let addYears = function (years) {
+  for (let year of years) {
+    let button = document.createElement('p')
+    button.textContent = year
+    button.style.display = 'block'
+    document.body.appendChild(button)
+  }
+}
+let addDestinations = function (destinations) {
+  for (let destination of destinations) {
+    let button = document.createElement('p')
+    button.textContent = destination.name
+    button.style.display = 'block'
+    document.body.appendChild(button)
+  }
+}
+let addOrigins = function (origins) {
+  for (let origin of origins) {
+    let button = document.createElement('p')
     let click = function (element, name, path) {
       element.addEventListener('click', function () {
         let req = new XMLHttpRequest()
         req.open('GET', '/institutions/' + path + '.json', true)
-        req.onload = function () { console.log(req.responseText) }
+        req.onload = function () {
+          document.body.innerHTML = ''
+          addDestinations(JSON.parse(req.responseText).destinations)
+          addYears(JSON.parse(req.responseText).years)
+        }
         req.send()
       })
     }
-    button.textContent = institution.name
+    button.textContent = origin.name
     button.style.display = 'block'
-    click(button, institution.name, institution.path)
+    click(button, origin.name, origin.path)
     document.body.appendChild(button)
   }
 }
 
 let req = new XMLHttpRequest()
 req.open('GET', '/institutions.json', true)
-req.onload = function () { addInstitutions(JSON.parse(req.responseText)) }
+req.onload = function () { addOrigins(JSON.parse(req.responseText)) }
 req.send()
 
 console.log('index.js')

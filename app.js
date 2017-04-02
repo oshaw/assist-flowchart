@@ -1,11 +1,11 @@
 'use strict'
 
-const router = require('./assets/router')
+const routes = require('./assets/routes')
 const api = require('./assets/api')
 const express = require('express')
 const app = express()
 
-router(app)
+routes(app)
 api(app)
 
 app.use(express.static('./assets'))

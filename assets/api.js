@@ -21,7 +21,22 @@ let getYears = function ($) {
       $(this).children().each(function (j, option) {
         output.push($(this).text())
       })
-      console.log(output)
+    }
+  })
+  return output
+}
+let getDestinations = function ($) {
+  let output = []
+  $('select').each(function (i, select) {
+    if ($(this).attr('name') === 'oia') {
+      $(this).children().each(function (j, option) {
+        if ($(this).attr('value')) {
+          output.push({
+            name: $(this).text().substring(21).trim(),
+            path: $(this).attr('value').match('oia=(.*)&')[1]
+          })
+        }
+      })
     }
   })
   return output
@@ -37,7 +52,7 @@ module.exports = function (app) {
   app.get('/institutions/:path.json', function (req, res) {
     let url = 'http://www.assist.org/web-assist/' + req.params.path + '.html'
     xhr(url, function ($) {
-      res.send(getYears($))
+      res.send({ destinations: getDestinations($), years: getYears($) })
     })
   })
 }
