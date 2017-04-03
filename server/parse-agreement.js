@@ -17,6 +17,21 @@ let isRecommendedSection = function (section) {
   ]
   for (let check of checks) { if (check(section)) return true }
 }
+let extractCourses = function (section, callback) {
+  let lines = section.split('\n')
+  let courses = []
+  let buffer = ''
+  for (let line of lines) {
+    line = S(line)
+    if (line.between('|').isEmpty()) continue
+    if (line.contains('(') && !S(buffer).isEmpty()) {
+      courses.push(buffer)
+      buffer = ''
+    }
+    buffer += line.between('|').collapseWhitespace().s.trim()
+  }
+  return courses
+}
 
 module.exports = function (agreement) {
   S.extendPrototype()
@@ -31,10 +46,13 @@ module.exports = function (agreement) {
       current = courses.recommended
     }
     if (section.contains('|')) {
-      current.push(section.left(10))
+      for (let course of extractCourses(section)) {
+        console.log(course)
+        current.push(course)
+      }
     }
   }
-  console.log(courses)
+  // console.log(courses)
   S.restorePrototype()
   return agreement
 }
