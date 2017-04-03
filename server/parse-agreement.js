@@ -5,17 +5,17 @@ const numDashesInDivider = 80
 
 let isOrSection = function (section) {
   section = S(section.toLowerCase())
-  let checks = [
+  let tests = [
     function (data) { return data.contains('from') && data.contains('list') }
   ]
-  for (let check of checks) { if (check(section)) return true }
+  for (let test of tests) { if (test(section)) return true }
 }
 let isRecommendedSection = function (section) {
   section = S(section.toLowerCase())
-  let checks = [
+  let tests = [
     function (data) { return data.contains('strongly recommended') }
   ]
-  for (let check of checks) { if (check(section)) return true }
+  for (let test of tests) { if (test(section)) return true }
 }
 let extractCourses = function (section, callback) {
   let lines = section.split('\n')
