@@ -2,25 +2,6 @@
 
 const request = require('./request.js')
 
-let parseOriginName = function ($) {
-  let output
-  $('#ia').children().each(function (i, option) {
-    if ($(this).attr('selected') !== undefined && $(this).text() !== '') {
-      output = $(this).html().trim()
-    }
-  })
-  return output
-}
-let parseDestinationName = function ($) {
-  let output
-  $('#oia').children().each(function (i, option) {
-    if ($(this).attr('selected') !== undefined && $(this).text() !== '') {
-      output = $(this).text().substring(21).trim()
-    }
-  })
-  return output
-}
-
 let parseOrigins = function ($) {
   let output = []
   $('option').each(function (i, option) {
@@ -76,19 +57,16 @@ let parseMajors = function ($) {
   })
   return output
 }
-
 let getOrigins = function (callback) {
   let url = 'http://www.assist.org/web-assist/welcome.html'
   request(url, function ($) {
-    callback({ endpoint: 'origins', origins: parseOrigins($) })
+    callback({ origins: parseOrigins($) })
   })
 }
 let getDestinationsAndYears = function (origin, callback) {
   let url = 'http://www.assist.org/web-assist/' + origin + '.html'
   request(url, function ($) {
     callback({
-      endpoint: 'destinations',
-      origin: { name: parseOriginName($), path: origin },
       destinations: parseDestinations($),
       years: parseYears($)
     })
@@ -96,14 +74,7 @@ let getDestinationsAndYears = function (origin, callback) {
 }
 let getMajors = function (origin, destination, year, callback) {
   let url = 'http://web2.assist.org/web-assist/articulationAgreement.do?inst1=none&inst2=none' + '&ia=' + origin + '&ay=' + year + '&oia=' + destination + '&dir=1'
-  request(url, function ($) {
-    callback({
-      origin: { name: parseOriginName($), path: origin },
-      destination: { name: parseDestinationName($), path: destination },
-      year: year,
-      majors: parseMajors($)
-    })
-  })
+  request(url, function ($) { callback({ majors: parseMajors($) }) })
 }
 let getAgreement = function (origin, destination, year, major, callback) {
   let url = 'http://web2.assist.org/cgi-bin/REPORT_2/Rep2.pl?' +
@@ -117,8 +88,41 @@ let getAgreement = function (origin, destination, year, major, callback) {
     '&sia=' + origin +
     '&ia=' + origin +
     '&dir=1&&sidebar=false&rinst=left&mver=2&kind=5&dt=2'
+  request(url, function ($) { callback({ agreement: $('body').html() }) })
+}
+
+let parseOriginName = function ($) {
+  let output
+  $('#ia').children().each(function (i, option) {
+    if ($(this).attr('selected') !== undefined && $(this).text() !== '') {
+      output = $(this).html().trim()
+    }
+  })
+  return output
+}
+let parseDestinationName = function ($) {
+  let output
+  $('#oia').children().each(function (i, option) {
+    if ($(this).attr('selected') !== undefined && $(this).text() !== '') {
+      output = $(this).text().substring(21).trim()
+    }
+  })
+  return output
+}
+let resolveOriginName = function (origin, callback) {
+  let url = 'http://www.assist.org/web-assist/' + origin + '.html'
   request(url, function ($) {
-    callback($('body').html())
+    callback({
+      origin: { name: parseOriginName($) }
+    })
+  })
+}
+let resolveDestinationAndOriginName = function (origin, destination, year, callback) {
+  let url = 'http://web2.assist.org/web-assist/articulationAgreement.do?inst1=none&inst2=none' + '&ia=' + origin + '&ay=' + year + '&oia=' + destination + '&dir=1'
+  request(url, function ($) {
+    callback({
+      destination: { name: parseDestinationName($) }
+    })
   })
 }
 
@@ -126,5 +130,7 @@ module.exports = {
   getOrigins: getOrigins,
   getDestinationsAndYears: getDestinationsAndYears,
   getMajors: getMajors,
-  getAgreement: getAgreement
+  getAgreement: getAgreement,
+  resolveOriginName: resolveOriginName,
+  resolveDestinationAndOriginName: resolveDestinationAndOriginName
 }
