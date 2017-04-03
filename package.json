@@ -2,7 +2,7 @@
   "name": "assist-client",
   "version": "0.2.0",
   "description": "Create flowcharts of assist.org's articulation agreements",
-  "main": "app.js",
+  "main": "node.js",
   "scripts": {
     "start": "node node.js",
     "test": "mocha ./node --recursive --harmony"
