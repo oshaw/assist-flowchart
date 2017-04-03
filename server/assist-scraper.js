@@ -118,7 +118,7 @@ let getAgreement = function (origin, destination, year, major, callback) {
     '&ia=' + origin +
     '&dir=1&&sidebar=false&rinst=left&mver=2&kind=5&dt=2'
   request(url, function ($) {
-    callback($('body').text())
+    callback($('body').html())
   })
 }
 
