@@ -1,6 +1,6 @@
 'use strict'
 
-let xhr = function (url, callback) {
+module.exports = function (url, callback) {
   let request = require('request')
   let cheerio = require('cheerio')
   request(url, function (err, res, body) {
@@ -8,5 +8,3 @@ let xhr = function (url, callback) {
     if (res.statusCode === 200) callback(cheerio.load(body))
   })
 }
-
-module.exports = xhr
