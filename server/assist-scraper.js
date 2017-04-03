@@ -88,7 +88,7 @@ let getAgreement = function (origin, destination, year, major, callback) {
     '&sia=' + origin +
     '&ia=' + origin +
     '&dir=1&&sidebar=false&rinst=left&mver=2&kind=5&dt=2'
-  request(url, function ($) { callback({ agreement: $('body').html() }) })
+  request(url, function ($) { callback({ agreement: $('body').text() }) })
 }
 
 let parseOriginName = function ($) {
@@ -112,17 +112,13 @@ let parseDestinationName = function ($) {
 let resolveOriginName = function (origin, callback) {
   let url = 'http://www.assist.org/web-assist/' + origin + '.html'
   request(url, function ($) {
-    callback({
-      origin: { name: parseOriginName($) }
-    })
+    callback({ origin: { name: parseOriginName($) } })
   })
 }
 let resolveDestinationAndOriginName = function (origin, destination, year, callback) {
   let url = 'http://web2.assist.org/web-assist/articulationAgreement.do?inst1=none&inst2=none' + '&ia=' + origin + '&ay=' + year + '&oia=' + destination + '&dir=1'
   request(url, function ($) {
-    callback({
-      destination: { name: parseDestinationName($) }
-    })
+    callback({ destination: { name: parseDestinationName($) } })
   })
 }
 

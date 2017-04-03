@@ -55,7 +55,7 @@ module.exports = function (query, callback, error) {
         break
       }
       assist.getAgreement(query.origin, query.destination, query.year, query.major, function (data) {
-        callback(data)
+        callback(parser(data.agreement))
       })
       break
     }
