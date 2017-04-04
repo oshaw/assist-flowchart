@@ -17,19 +17,43 @@ let isRecommendedSection = function (section) {
   ]
   for (let test of tests) { if (test(section)) return true }
 }
-let extractCourses = function (section, callback) {
+
+let parseStream = function (stream, object) {
+  object.id = S(stream).between('', '    ').s
+  stream = S(stream).between('    ').s
+  object.units = S(stream).between('(', ')').s
+  stream = S(stream.replace(/ \([^)]*\) /g, '')).collapseWhitespace().s
+  object.name = stream.trim()
+  return object
+}
+let parseStreams = function (streams) {
+  let course = { articulates: {} }
+  if (streams.course === 'NO COURSE ARTICULATED') course.articulated = false
+  else course = parseStream(streams.course, course)
+  course.articulates = parseStream(streams.articulates, course.articulates)
+  return course
+}
+let parseSections = function (section) {
   let lines = section.split('\n')
+  let buffer = { course: '', articulates: '' }
+  let streamses = []
   let courses = []
-  let buffer = ''
+  let flush = function () {
+    streamses.push(buffer)
+    buffer = { course: '', articulates: '' }
+  }
   for (let line of lines) {
     line = S(line)
-    if (line.between('|').isEmpty()) continue
-    if (line.contains('(') && !S(buffer).isEmpty()) {
-      courses.push(buffer)
-      buffer = ''
-    }
-    buffer += line.between('|').collapseWhitespace().s.trim()
+    if (
+      line.between('', '|').s.match('/((1-9)/)') &&
+      line.between('|').s.match('/((1-9)/)')
+    ) flush()
+    buffer.course += line.between('|').s.trim() + ' '
+    buffer.articulates += line.between('', '|').s.trim() + ' '
   }
+  if (buffer.course !== '') flush()
+  for (let streams of streamses) courses.push(parseStreams(streams))
+  // console.log(courses)
   return courses
 }
 
@@ -46,13 +70,9 @@ module.exports = function (agreement) {
       current = courses.recommended
     }
     if (section.contains('|')) {
-      for (let course of extractCourses(section)) {
-        console.log(course)
-        current.push(course)
-      }
+      current.push.apply(current, parseSections(section))
     }
   }
-  // console.log(courses)
   S.restorePrototype()
   return agreement
 }
