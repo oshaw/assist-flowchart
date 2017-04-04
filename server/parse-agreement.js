@@ -28,9 +28,12 @@ let parseStream = function (stream, object) {
 }
 let parseStreams = function (streams) {
   let course = { articulates: {} }
-  if (streams.course === 'NO COURSE ARTICULATED') course.articulated = false
+  if (S(streams.course).contains('NO COURSE ARTICULATED')) {
+    course.articulated = false
+  }
   else course = parseStream(streams.course, course)
   course.articulates = parseStream(streams.articulates, course.articulates)
+  console.log(course)
   return course
 }
 let parseSections = function (section) {
@@ -53,7 +56,6 @@ let parseSections = function (section) {
   }
   if (buffer.course !== '') flush()
   for (let streams of streamses) courses.push(parseStreams(streams))
-  // console.log(courses)
   return courses
 }
 
