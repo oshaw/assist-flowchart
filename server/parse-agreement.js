@@ -1,80 +1,80 @@
 'use strict'
 
-const S = require('string')
-const numDashesInDivider = 80
+const fs = require('fs')
 
-let isOrSection = function (section) {
-  section = S(section.toLowerCase())
-  let tests = [
-    function (data) { return data.contains('from') && data.contains('list') }
-  ]
-  for (let test of tests) { if (test(section)) return true }
-}
-let isRecommendedSection = function (section) {
-  section = S(section.toLowerCase())
-  let tests = [
-    function (data) { return data.contains('strongly recommended') }
-  ]
-  for (let test of tests) { if (test(section)) return true }
+let logObject = function (object) {
+  console.log(JSON.stringify(object, null, 4))
 }
 
-let parseStream = function (stream, object) {
-  object.id = S(stream).between('', '    ').s
-  stream = S(stream).between('    ').s
-  object.units = S(stream).between('(', ')').s
-  stream = S(stream.replace(/ \([^)]*\) /g, '')).collapseWhitespace().s
-  object.name = stream.trim()
-  return object
+let isLineOrHeader = function (line) {
+  line = line.toLowerCase()
+  let tests = [
+    function (line) { return line.match(/(from).*(list)/) }
+  ]
+  for (let test of tests) { if (test(line)) return true }
 }
-let parseStreams = function (streams) {
-  let course = { articulates: {} }
-  if (S(streams.course).contains('NO COURSE ARTICULATED')) {
-    course.articulated = false
-  }
-  else course = parseStream(streams.course, course)
-  course.articulates = parseStream(streams.articulates, course.articulates)
-  console.log(course)
-  return course
+let isLineRecommendedHeader = function (line) {
+  line = line.toLowerCase()
+  let tests = [
+    function (line) { return line.match(/strongly recommended/) }
+  ]
+  for (let test of tests) { if (test(line)) return true }
 }
-let parseSections = function (section) {
-  let lines = section.split('\n')
-  let buffer = { course: '', articulates: '' }
-  let streamses = []
-  let courses = []
-  let flush = function () {
-    streamses.push(buffer)
-    buffer = { course: '', articulates: '' }
-  }
+let splitAgreementToGroupStreams = function (agreement, plan) {
+  let lines = agreement.substring(agreement.indexOf('|') - 41).split('\n')
+  let output = plan.required
   for (let line of lines) {
-    line = S(line)
-    if (
-      line.between('', '|').s.match('/((1-9)/)') &&
-      line.between('|').s.match('/((1-9)/)')
-    ) flush()
-    buffer.course += line.between('|').s.trim() + ' '
-    buffer.articulates += line.between('', '|').s.trim() + ' '
+    if (!line.match(/\|/)) {
+      if (isLineOrHeader(line)) output = plan.or
+      if (isLineRecommendedHeader(line)) output = plan.recommended
+      continue
+    }
+    output.push(line)
   }
-  if (buffer.course !== '') flush()
-  for (let streams of streamses) courses.push(parseStreams(streams))
-  return courses
 }
 
-module.exports = function (agreement) {
-  S.extendPrototype()
-  let sections = agreement.split(('-').repeat(numDashesInDivider))
-  let courses = { required: [], or: [], recommended: [] }
-  let current = courses.required
-  for (let section of sections) {
-    if (courses.required.length !== 0 && isOrSection(section)) {
-      current = courses.or
+let assembleStreamsToCourseStrings = function (plan) {
+  for (let group in plan) {
+    let output = []
+    let buffer = { course: [], equals: [] }
+    let linked = { course: false, equals: false }
+    let flush = function () {
+      if (buffer.course.length && buffer.equals.length) {
+        output.push({
+          course: buffer.course.join(' ').replace(/\r/g, ''),
+          equals: buffer.equals.join(' ').replace(/\r/g, '')
+        })
+        buffer = { course: [], equals: [] }
+        linked = { course: false, equals: false }
+      }
     }
-    if (courses.required.length !== 0 && isRecommendedSection(section)) {
-      current = courses.recommended
+    for (let line of plan[group]) {
+      let string = {
+        course: line.match(/[^|]*$/)[0],
+        equals: line.match(/^(.*)(?=\|)/)[0]
+      }
+      if (string.course.match(/\([0-9]\)/) ||
+          string.equals.match(/\([0-9]\)/)) {
+        if (!linked.course &&
+            !linked.equals) flush()
+      }
+      if (string.course.match(/(OR)|(AND)|(\s&\s\s)/)) linked.course = true
+      if (string.equals.match(/(OR)|(AND)|(\s&\s\s)/)) linked.equals = true
+      if (string.course.match(/\([0-9]\)/)) linked.course = false
+      if (string.equals.match(/\([0-9]\)/)) linked.equals = false
+      buffer.course.push(string.course)
+      buffer.equals.push(string.equals)
     }
-    if (section.contains('|')) {
-      current.push.apply(current, parseSections(section))
-    }
+    flush()
+    logObject(output)
+    plan[group] = output
   }
-  S.restorePrototype()
-  return agreement
+}
+
+module.exports = function () {
+  let agreement = fs.readFileSync('./server/agreement.txt', 'UTF8')
+  let plan = { required: [], or: [], recommended: [] }
+  splitAgreementToGroupStreams(agreement, plan)
+  assembleStreamsToCourseStrings(plan)
+  // logObject(plan)
 }
