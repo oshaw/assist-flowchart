@@ -194,7 +194,6 @@ let parseCourses = function (plan) {
     }
   }
 }
-
 let combineOrAndRequiredGroups = function (plan) {
   let output = { relation: 'parallel or', options: [] }
   for (let block of plan.or) {
