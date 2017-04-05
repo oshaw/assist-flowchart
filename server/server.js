@@ -1,8 +1,10 @@
 'use strict'
 
 const api = require('./api-handler.js')
+const prereq = require('./get-dvc-prereq.js')
 
 module.exports = function (server, root) {
+  prereq()
   server.get('/api', function (req, res) {
     api(req.query, function (data) { res.send(data) }, function (data) { res.send(data) })
   })
