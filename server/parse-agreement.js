@@ -1,16 +1,13 @@
 'use strict'
 
-const fs = require('fs')
-const S = require('string')
-const agreement = fs.readFileSync('./server/angeles.txt', 'UTF8')
-
 let logObject = function (object) {
   console.log(JSON.stringify(object, null, 4))
 }
 let isLineOrHeader = function (line) {
   line = line.toLowerCase()
   let tests = [
-    function (line) { return line.match(/(from).*(list)/) }
+    function (line) { return line.match(/(from).*(list)/) },
+    function (line) { return line.match(/(following).*(groups)/) }
   ]
   for (let test of tests) { if (test(line)) return true }
 }
@@ -20,6 +17,9 @@ let isLineRecommendedHeader = function (line) {
     function (line) { return line.match(/strongly recommended/) }
   ]
   for (let test of tests) { if (test(line)) return true }
+}
+let collapseWhitespace = function (string) {
+  return string.replace(/\s+/g, ' ')
 }
 
 let splitAgreementToGroupStreams = function (agreement, plan) {
@@ -173,14 +173,50 @@ let parseAmpersand = function (plan) {
     }
   }
 }
+let parseCourses = function (plan) {
+  for (let key in plan) {
+    if (typeof plan[key] === 'object') {
+      if (plan[key].hasOwnProperty('raw')) {
+        let side = plan[key].raw.join(' ')
+        if (side.toLowerCase().match(/no course articulated/)) {
+          plan[key] = { articulated: false }
+          continue
+        }
+        let output = { id: '', name: '', units: 0 }
+        if (side.match(/[0-Z]\s*&\s*[0-Z]/)) side = side.replace(/&/, ' ')
+        output.id = side.match(/([0-Z\s]*)\s\s/)[0].trim()
+        side = side.substring(output.id.length)
+        output.units = parseInt(side.match(/\([0-9]\)/)[0].replace(/[()]/g, ''))
+        side = side.replace(/\([0-9]\)/, '')
+        output.name = collapseWhitespace(side).trim()
+        plan[key] = output
+      } else parseCourses(plan[key])
+    }
+  }
+}
+let combineOrAndRequiredGroups = function (plan) {
+  let output = { relation: 'parallel or', options: [] }
+  for (let block of plan.or) {
+    if (JSON.stringify(block).match(/\s\sOR/)) {
+      let wrapper = { value: block }
+      parseOr(wrapper)
+      block = wrapper.value
+    }
+    output.options.push(block)
+  }
+  plan.required.push(output)
+  delete plan.or
+}
 
-module.exports = function () {
+module.exports = function (agreement) {
   let plan = { required: [], or: [], recommended: [] }
   splitAgreementToGroupStreams(agreement, plan)
   sortStreamsByBlock(plan)
   parseAnd(plan)
   parseOr(plan.required)
   parseOr(plan.recommended)
+  combineOrAndRequiredGroups(plan)
   parseAmpersand(plan)
-  logObject(plan)
+  parseCourses(plan)
+  return plan
 }
