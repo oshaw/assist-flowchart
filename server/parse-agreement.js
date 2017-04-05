@@ -2,6 +2,7 @@
 
 const fs = require('fs')
 const S = require('string')
+const agreement = fs.readFileSync('./server/angeles.txt', 'UTF8')
 
 let logObject = function (object) {
   console.log(JSON.stringify(object, null, 4))
@@ -58,12 +59,16 @@ let sortStreamsByBlock = function (plan) {
         if (!linked.course &&
             !linked.equals) flush()
       }
-      if (string.course.match(/\([0-9]\)/)) linked.course = false
-      if (string.equals.match(/\([0-9]\)/)) linked.equals = false
-      if (string.course.match(/(\s\sOR)|(\s\sAND)|(\s&\s\s)/)) {
+      if (string.course.match(/\([0-9]\)/)) {
+        linked = { course: false, equals: false }
+      }
+      if (string.equals.match(/\([0-9]\)/)) {
+        linked = { course: false, equals: false }
+      }
+      if (string.course.match(/(\s\sOR)|(\s\sAND)|([0-Z]\s*&\s*[0-Z])/)) {
         linked.course = true
       }
-      if (string.equals.match(/(\s\sOR)|(\s\sAND)|(\s&\s\s)/)) {
+      if (string.equals.match(/(\s\sOR)|(\s\sAND)|([0-Z]\s*&\s*[0-Z])/)) {
         linked.equals = true
       }
       buffer.course.push(string.course.replace(/\r/g, ''))
@@ -73,48 +78,109 @@ let sortStreamsByBlock = function (plan) {
     plan[group] = output
   }
 }
-let parseOr = function (group) {
-  for (let block of group) {
-    if (block.course.raw.join('').match(/\s\sOR/)) {
-      let isParallel = block.equals.raw.join('').match(/\s\sOR/)
-      let output = (isParallel)
-        ? { relation: 'parallel or', options: [] }
-        : { course: { relation: 'or', options: [] }, equals: block.equals }
-      let buffer = (isParallel) ? { course: [], equals: [] } : []
-      let flush = function () {
-        if (isParallel) {
-          output.options.push({ course: {
-            raw: buffer.course,
-            equals: buffer.equals
-          } })
+let parseAnd = function (plan) {
+  for (let group in plan) {
+    for (let i = 0; i < plan[group].length; i++) {
+      let block = plan[group][i]
+      if (block.course.raw.join('').match(/\s\sAND/)) {
+        let output = { relation: 'parallel and', components: [] }
+        let buffer = { course: [], equals: [] }
+        let flush = function () {
+          output.components.push({
+            course: { raw: buffer.course },
+            equals: { raw: buffer.equals }
+          })
           buffer = { course: [], equals: [] }
-        } else {
-          output.course.options.push({ raw: buffer })
-          buffer = []
         }
-      }
-      for (let i = 0; i < block.course.raw.length; i++) {
-        if (block.course.raw[i].match(/\s\sOR/)) {
-          flush()
-          continue
-        }
-        if (isParallel) {
+        for (let i = 0; i < block.course.raw.length; i++) {
+          if (block.course.raw[i].match(/\s\sAND/)) {
+            flush()
+            continue
+          }
           buffer.course.push(block.course.raw[i])
           buffer.equals.push(block.equals.raw[i])
-        } else buffer.push(block.course.raw[i])
+        }
+        flush()
+        plan[group][i] = output
       }
-      flush()
-      block = output
-      logObject(block)
+    }
+  }
+}
+let parseOr = function (group) {
+  for (let key in group) {
+    if (typeof group[key] === 'object') {
+      if (group[key].hasOwnProperty('course')) {
+        let block = group[key]
+        if (block.course.raw.join('').match(/\s\sOR/)) {
+          let isParallel = block.equals.raw.join('').match(/\s\sOR/)
+          let output = (isParallel)
+            ? { relation: 'parallel or', options: [] }
+            : { course: { relation: 'or', options: [] }, equals: block.equals }
+          let buffer = (isParallel) ? { course: [], equals: [] } : []
+          let flush = function () {
+            if (isParallel) {
+              output.options.push({
+                course: { raw: buffer.course },
+                equals: { raw: buffer.equals }
+              })
+              buffer = { course: [], equals: [] }
+            } else {
+              output.course.options.push({ raw: buffer })
+              buffer = []
+            }
+          }
+          for (let i = 0; i < block.course.raw.length; i++) {
+            if (block.course.raw[i].match(/\s\sOR/)) {
+              flush()
+              continue
+            }
+            if (isParallel) {
+              buffer.course.push(block.course.raw[i])
+              buffer.equals.push(block.equals.raw[i])
+            } else buffer.push(block.course.raw[i])
+          }
+          flush()
+          group[key] = output
+        }
+      } else parseOr(group[key])
+    }
+  }
+}
+let parseAmpersand = function (plan) {
+  for (let key in plan) {
+    if (typeof plan[key] === 'object') {
+      if (plan[key].hasOwnProperty('raw')) {
+        if (plan[key].raw.join('').match(/[0-Z]\s*&\s*[0-Z]/)) {
+          let side = plan[key].raw
+          let output = { relation: 'ampersand', components: [] }
+          let buffer = []
+          let flush = function () {
+            if (buffer.length) {
+              output.components.push({ raw: buffer })
+              buffer = []
+            }
+          }
+          for (let line of side) {
+            if (line.match(/\([0-9]\)/)) {
+              flush()
+            }
+            buffer.push(line)
+          }
+          flush()
+          plan[key] = output
+        }
+      } else parseAmpersand(plan[key])
     }
   }
 }
 
 module.exports = function () {
-  let agreement = fs.readFileSync('./server/agreement.txt', 'UTF8')
   let plan = { required: [], or: [], recommended: [] }
   splitAgreementToGroupStreams(agreement, plan)
   sortStreamsByBlock(plan)
+  parseAnd(plan)
   parseOr(plan.required)
-  // logObject(plan)
+  parseOr(plan.recommended)
+  parseAmpersand(plan)
+  logObject(plan)
 }
