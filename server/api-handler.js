@@ -2,6 +2,11 @@
 
 const assist = require('./assist-scraper.js')
 const parser = require('./parse-agreement.js')
+const prereq = require('./get-dvc-prereq.js')
+
+const logObject = function (object) {
+  console.log(JSON.stringify(object, null, 4))
+}
 
 module.exports = function (query, callback, error) {
   switch (query.endpoint) {
@@ -55,7 +60,7 @@ module.exports = function (query, callback, error) {
         break
       }
       assist.getAgreement(query.origin, query.destination, query.year, query.major, function (data) {
-        callback(parser(data.agreement))
+        prereq(parser(data.agreement), function (plan) { callback(plan) })
       })
       break
     }

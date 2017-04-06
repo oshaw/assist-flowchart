@@ -1,5 +1,8 @@
 'use strict'
 
+// const fs = require('fs')
+// let agreement = fs.readFileSync('./server/angeles.txt', 'UTF8')
+
 let logObject = function (object) {
   console.log(JSON.stringify(object, null, 4))
 }
@@ -22,17 +25,25 @@ let collapseWhitespace = function (string) {
   return string.replace(/\s+/g, ' ')
 }
 
-let splitAgreementToGroupStreams = function (agreement, plan) {
+let splitAgreementToGroupStreams = function (agreement) {
   let lines = agreement.substring(agreement.indexOf('|') - 41).split('\n')
+  let plan = { required: [] }
   let output = plan.required
   for (let line of lines) {
     if (!line.match(/\|/)) {
-      if (isLineOrHeader(line)) output = plan.or
-      if (isLineRecommendedHeader(line)) output = plan.recommended
+      if (isLineOrHeader(line)) {
+        plan.or = []
+        output = plan.or
+      }
+      if (isLineRecommendedHeader(line)) {
+        plan.recommended = []
+        output = plan.recommended
+      }
       continue
     }
     output.push(line)
   }
+  return plan
 }
 let sortStreamsByBlock = function (plan) {
   for (let group in plan) {
@@ -83,10 +94,10 @@ let parseAnd = function (plan) {
     for (let i = 0; i < plan[group].length; i++) {
       let block = plan[group][i]
       if (block.course.raw.join('').match(/\s\sAND/)) {
-        let output = { relation: 'parallel and', components: [] }
+        let output = { relation: 'parallel and', parts: [] }
         let buffer = { course: [], equals: [] }
         let flush = function () {
-          output.components.push({
+          output.parts.push({
             course: { raw: buffer.course },
             equals: { raw: buffer.equals }
           })
@@ -114,18 +125,18 @@ let parseOr = function (group) {
         if (block.course.raw.join('').match(/\s\sOR/)) {
           let isParallel = block.equals.raw.join('').match(/\s\sOR/)
           let output = (isParallel)
-            ? { relation: 'parallel or', options: [] }
-            : { course: { relation: 'or', options: [] }, equals: block.equals }
+            ? { relation: 'parallel or', parts: [] }
+            : { course: { relation: 'or', parts: [] }, equals: block.equals }
           let buffer = (isParallel) ? { course: [], equals: [] } : []
           let flush = function () {
             if (isParallel) {
-              output.options.push({
-                course: { raw: buffer.course },
-                equals: { raw: buffer.equals }
+              output.parts.push({
+                course: { course: { raw: buffer.course } },
+                equals: { equals: { raw: buffer.equals } }
               })
               buffer = { course: [], equals: [] }
             } else {
-              output.course.options.push({ raw: buffer })
+              output.course.parts.push({ course: { raw: buffer } })
               buffer = []
             }
           }
@@ -152,11 +163,11 @@ let parseAmpersand = function (plan) {
       if (plan[key].hasOwnProperty('raw')) {
         if (plan[key].raw.join('').match(/[0-Z]\s*&\s*[0-Z]/)) {
           let side = plan[key].raw
-          let output = { relation: 'ampersand', components: [] }
+          let output = { relation: 'ampersand', parts: [] }
           let buffer = []
           let flush = function () {
             if (buffer.length) {
-              output.components.push({ raw: buffer })
+              output.parts.push({ course: { raw: buffer } })
               buffer = []
             }
           }
@@ -182,6 +193,10 @@ let parseCourses = function (plan) {
           plan[key] = { articulated: false }
           continue
         }
+        if (!side.match(/\([0-9]\)/)) {
+          plan[key] = { text: collapseWhitespace(side).trim() }
+          continue
+        }
         let output = { id: '', name: '', units: 0 }
         if (side.match(/[0-Z]\s*&\s*[0-Z]/)) side = side.replace(/&/, ' ')
         output.id = side.match(/([0-Z\s]*)\s\s/)[0].trim()
@@ -195,27 +210,26 @@ let parseCourses = function (plan) {
   }
 }
 let combineOrAndRequiredGroups = function (plan) {
-  let output = { relation: 'parallel or', options: [] }
+  let output = { relation: 'parallel or', parts: [] }
   for (let block of plan.or) {
     if (JSON.stringify(block).match(/\s\sOR/)) {
       let wrapper = { value: block }
       parseOr(wrapper)
       block = wrapper.value
     }
-    output.options.push(block)
+    output.parts.push(block)
   }
   plan.required.push(output)
   delete plan.or
 }
 
 module.exports = function (agreement) {
-  let plan = { required: [], or: [], recommended: [] }
-  splitAgreementToGroupStreams(agreement, plan)
+  let plan = splitAgreementToGroupStreams(agreement)
   sortStreamsByBlock(plan)
   parseAnd(plan)
-  parseOr(plan.required)
-  parseOr(plan.recommended)
-  combineOrAndRequiredGroups(plan)
+  if (plan.required) parseOr(plan.required)
+  if (plan.recommended) parseOr(plan.recommended)
+  if (plan.or) combineOrAndRequiredGroups(plan)
   parseAmpersand(plan)
   parseCourses(plan)
   return plan
