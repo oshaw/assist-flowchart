@@ -1,11 +1,5 @@
 'use strict'
 
-// const fs = require('fs')
-// let agreement = fs.readFileSync('./server/angeles.txt', 'UTF8')
-
-let logObject = function (object) {
-  console.log(JSON.stringify(object, null, 4))
-}
 let isLineOrHeader = function (line) {
   line = line.toLowerCase()
   let tests = [
@@ -167,7 +161,9 @@ let parseAmpersand = function (plan) {
           let buffer = []
           let flush = function () {
             if (buffer.length) {
-              output.parts.push({ course: { raw: buffer } })
+              (key === 'course')
+                ? output.parts.push({ course: { raw: buffer } })
+                : output.parts.push({ equals: { raw: buffer } })
               buffer = []
             }
           }

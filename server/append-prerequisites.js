@@ -1,7 +1,15 @@
 'use strict'
 
 const request = require('./request.js')
-const appendPrereqs = function (course, callback) {
+const parsePrerequisites = function (string) {
+  return string.replace(/[Ee]quivalent/g, '')
+               .replace(/\s((or)|(OR))\s/g, '~')
+               .replace(/~\s*$/g, ' ')
+               .replace(/\s+/g, ' ')
+               .trim()
+               .split('~')
+}
+const appendPrerequisites = function (course, callback) {
   const url = 'http://www3.dvc.edu/org/info/course-outlines/'
   request(url + 'course-outline-results.htm?course=' + course.id.replace(/\s/, '+'), function ($) {
     $('a').each(function (i, link) {
@@ -9,10 +17,10 @@ const appendPrereqs = function (course, callback) {
         request(url + $(this).attr('href'), function ($) {
           $('font').each(function (j, row) {
             if ($(this).text().match(/Prerequisite/)) {
-              course.prerequisites = $('font')[j + 1].children[0].data
+              course.prerequisites = parsePrerequisites($('font')[j + 1].children[0].data)
             }
             if ($(this).text().match(/Recommended/)) {
-              course.recommended = $('font')[j + 1].children[0].data
+              course.recommended = parsePrerequisites($('font')[j + 1].children[0].data)
             }
             if ($(this).text().match(/Notes/)) {
               course.notes = $('font')[j + 1].children[0].data
@@ -36,7 +44,7 @@ const recursiveCourseLoop = function (block, callback) {
   } else if (block.course.relation !== undefined) {
     recursiveCourseLoop(block.course, callback)
   } else if (block.course.articulated === undefined) {
-    appendPrereqs(block.course, callback)
+    appendPrerequisites(block.course, callback)
   } else callback()
 }
 
