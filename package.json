@@ -1,6 +1,6 @@
 {
   "name": "assist-client",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Create flowcharts of assist.org's articulation agreements",
   "main": "node.js",
   "scripts": {
@@ -21,6 +21,7 @@
     "cheerio": "^0.22.0",
     "express": "^4.15.2",
     "mocha": "^3.2.0",
+    "path": "^0.12.7",
     "request": "^2.81.0"
   }
 }

@@ -1,5 +1,4 @@
 'use strict'
-
 const request = require('./request.js')
 
 let parseOrigins = function ($) {

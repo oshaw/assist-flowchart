@@ -1,5 +1,4 @@
 'use strict'
-
 const api = require('./api-handler.js')
 
 module.exports = function (server, root) {
@@ -9,6 +8,6 @@ module.exports = function (server, root) {
   server.get('*', function (req, res) {
     if (req.query.endpoint !== undefined) {
       api(req.query, function (data) { res.send(data) }, function () {})
-    } else res.sendFile(root + '/client/view.html')
+    } else res.sendFile(root + '/client/compiled/view.html')
   })
 }
