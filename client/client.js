@@ -4,12 +4,14 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import {Provider} from 'react-redux'
 import {createStore} from 'redux'
-import reducers from './reducers/reducers'
+import reducer from './reducers/reducer'
 import View from './components/view'
 
-const store = createStore(reducers)
+const store = createStore(reducer)
 
 ReactDOM.render(
-  <View />,
+  <Provider store={store}>
+    <View />
+  </Provider>,
   document.getElementById('root')
 )
