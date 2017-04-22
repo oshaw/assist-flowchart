@@ -2,10 +2,11 @@
 import React, {Component} from 'react'
 import {bindActionCreators} from 'redux'
 import {connect} from 'react-redux'
-import {originUpdateResults, originSelect} from '../actions/actions'
+import {originUpdateResults, originSelect, originQuery} from '../actions/actions'
 
 class DropdownSearch extends Component {
   search (query) {
+    this.props.originQuery(query)
     const regexp = new RegExp(query, 'i')
     let results = []
     if (!query) {
@@ -26,18 +27,15 @@ class DropdownSearch extends Component {
       )
     })
   }
-  renderSelected () {
-    if (!this.props.origin.selected) return
-    return (
-      <p>{this.props.origin.selected.name}</p>
-    )
-  }
   render () {
     return (
       <div>
-        <input onChange={event => this.search(event.target.value)} type='text' />
+        <input
+          onChange={event => this.search(event.target.value)}
+          type='text'
+          value={this.props.origin.query}
+        />
         <div>{this.renderList()}</div>
-        <div>{this.renderSelected()}</div>
       </div>
     )
   }
@@ -47,7 +45,8 @@ function matchDispatchToProps (dispatch) {
   return bindActionCreators(
     {
       originUpdateResults: originUpdateResults,
-      originSelect: originSelect
+      originSelect: originSelect,
+      originQuery: originQuery
     },
     dispatch
   )
