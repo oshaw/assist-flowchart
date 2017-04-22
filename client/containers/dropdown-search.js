@@ -2,7 +2,7 @@
 import React, {Component} from 'react'
 import {bindActionCreators} from 'redux'
 import {connect} from 'react-redux'
-import {originUpdateResults} from '../actions/actions'
+import {originUpdateResults, originSelect} from '../actions/actions'
 
 class DropdownSearch extends Component {
   search (query) {
@@ -17,20 +17,27 @@ class DropdownSearch extends Component {
     })
     this.props.originUpdateResults(results)
   }
-  select () {}
+  select (item) { this.props.originSelect(item) }
   renderList () {
     if (!this.props.origin.results) return
     return this.props.origin.results.map((item) => {
       return (
-        <p key={item.name}>{item.name}</p>
+        <p key={item.name} onClick={() => this.select(item)}>{item.name}</p>
       )
     })
+  }
+  renderSelected () {
+    if (!this.props.origin.selected) return
+    return (
+      <p>{this.props.origin.selected.name}</p>
+    )
   }
   render () {
     return (
       <div>
         <input onChange={event => this.search(event.target.value)} type='text' />
         <div>{this.renderList()}</div>
+        <div>{this.renderSelected()}</div>
       </div>
     )
   }
@@ -38,7 +45,10 @@ class DropdownSearch extends Component {
 function mapStateToProps (state) { return {origin: state} }
 function matchDispatchToProps (dispatch) {
   return bindActionCreators(
-    {originUpdateResults: originUpdateResults},
+    {
+      originUpdateResults: originUpdateResults,
+      originSelect: originSelect
+    },
     dispatch
   )
 }
