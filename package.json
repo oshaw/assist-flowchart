@@ -4,7 +4,8 @@
   "description": "Create flowcharts of assist.org's articulation agreements",
   "main": "node.js",
   "scripts": {
-    "start": "node node.js",
+    "server": "nodemon node.js",
+    "client": "webpack-dev-server",
     "test": "mocha ./node --recursive --harmony"
   },
   "repository": {
@@ -40,6 +41,7 @@
     "redux-logger": "^2.6.1",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.1.0",
+    "request": "^2.81.0",
     "style-loader": "^0.13.1",
     "webpack": "^1.13.1",
     "webpack-dev-middleware": "^1.6.1",

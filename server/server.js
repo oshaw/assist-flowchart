@@ -8,6 +8,6 @@ module.exports = function (server, root) {
   server.get('*', function (req, res) {
     if (req.query.endpoint !== undefined) {
       api(req.query, function (data) { res.send(data) }, function () {})
-    } else res.sendFile(root + '/client/compiled/view.html')
+    } else res.sendFile(root + '/client/build/view.html')
   })
 }

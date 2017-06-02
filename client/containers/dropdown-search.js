@@ -23,7 +23,10 @@ class DropdownSearch extends Component {
     if (!this.props.origin.results) return
     return this.props.origin.results.map((item) => {
       return (
-        <p key={item.name} onClick={() => this.select(item)}>{item.name}</p>
+        <p
+          key={item.name}
+          onClick={() => this.select(item)}>{item.name}
+        </p>
       )
     })
   }
