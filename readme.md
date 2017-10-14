@@ -35,4 +35,4 @@ For example, the following
 ```bash
 localhost:3000/api?endpoint=agreement&origin=AHC&destination=CPP&year=15-16&major=ARCH
 ```
-returns the agreement from Allan Hancock College to California Polytechnic University, Pomona in the academic year 15-16 for Architecture.
+returns the agreement from Allan Hancock College to California Polytechnic University, Pomona in the academic year 15-16 for Architecture B. Arch.
