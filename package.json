@@ -1,7 +1,7 @@
 {
   "name": "assister",
   "version": "0.3.0",
-  "description": "Create flowcharts of assist.org's articulation agreements",
+  "description": "Create flowcharts out of assist.org's articulation agreements",
   "main": "node.js",
   "scripts": {
     "dev": "nodemon node.js",
@@ -10,17 +10,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oshaw/assist-client.git"
+    "url": "git+https://github.com/oshaw/assister.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/oshaw/assist-client/issues"
+    "url": "https://github.com/oshaw/assister/issues"
   },
-  "homepage": "https://github.com/oshaw/assist-client#readme",
+  "homepage": "https://github.com/oshaw/assister#readme",
   "dependencies": {
     "cheerio": "^0.22.0",
     "express": "^4.15.2",
+    "mocha": "^5.2.0",
     "path": "^0.12.7",
     "request": "^2.81.0"
   }
