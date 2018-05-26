@@ -127,8 +127,6 @@ let parseOr = function (group) {
               output.parts.push({
                 course: { raw: buffer.course },
                 equals: { raw: buffer.equals }
-                // course: { course: { raw: buffer.course } },
-                // equals: { equals: { raw: buffer.equals } }
               })
               buffer = { course: [], equals: [] }
             } else {
