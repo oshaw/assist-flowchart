@@ -1,5 +1,5 @@
 {
-  "name": "assist-client",
+  "name": "assister",
   "version": "0.3.0",
   "description": "Create flowcharts of assist.org's articulation agreements",
   "main": "node.js",
