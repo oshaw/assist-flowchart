@@ -10,10 +10,14 @@ const parsePrerequisites = function (string) {
                .split('~')
 }
 const appendPrerequisites = function (course, callback) {
-  const url = 'http://www3.dvc.edu/org/info/course-outlines/'
-  request(url + 'course-outline-results.htm?course=' + course.id.replace(/\s/, '+'), function ($) {
+  const url = 'http://www3.dvc.edu/org/info/course-outlines/course-outline-results.htm?course=' + course.id.replace(/\s/, '+')
+  console.log('Requesting', url)
+  request(url, function ($) {
+    console.log('Response from', url)
+    let found = false
     $('a').each(function (i, link) {
       if ($(this).text().match(/See details\.\.\./)) {
+        found = true
         request(url + $(this).attr('href'), function ($) {
           $('font').each(function (j, row) {
             if ($(this).text().match(/Prerequisite/)) {
@@ -30,6 +34,9 @@ const appendPrerequisites = function (course, callback) {
         })
       }
     })
+    if (!found) {
+      callback()
+    }
   })
 }
 const recursiveCourseLoop = function (block, callback) {
@@ -43,9 +50,9 @@ const recursiveCourseLoop = function (block, callback) {
     }
   } else if (block.course.relation !== undefined) {
     recursiveCourseLoop(block.course, callback)
-  } else if (block.course.articulated === undefined) {
+  } else if (block.course.id !== undefined) {
     appendPrerequisites(block.course, callback)
-  } else callback()
+  } else callback(block)
 }
 
 module.exports = function (plan, callback) {
@@ -53,9 +60,11 @@ module.exports = function (plan, callback) {
   for (let key in plan) {
     waiting += plan[key].length
     for (let i = 0; i < plan[key].length; i++) {
-      recursiveCourseLoop(plan[key][i], function () {
+      recursiveCourseLoop(plan[key][i], function (block) {
         waiting -= 1
-        if (!waiting) callback(plan)
+        if (!waiting) {
+          callback(plan)
+        }
       })
     }
   }

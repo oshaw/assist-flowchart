@@ -56,7 +56,14 @@ module.exports = function (query, callback, error) {
         break
       }
       assist.getAgreement(query.origin, query.destination, query.year, query.major, function (data) {
-        appendPrerequisites(parser(data.agreement), function (plan) { callback(plan) })
+        if (query.origin === 'DVC') {
+          appendPrerequisites(parser(data.agreement), function (plan) {
+            callback(plan)
+          })
+        }
+        else {
+          callback(parser(data.agreement))
+        }
       })
       break
     }
