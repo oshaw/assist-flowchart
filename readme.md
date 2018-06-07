@@ -19,9 +19,14 @@ With npm installed, run
 npm install
 ```
 
+Then run
+```bash
+yarn dev
+```
+
 Navigate to
 ```bash
-localhost:3000/api?endpoint=
+localhost:5000/api?endpoint=
 ```
 
 Fetch and parse list of origin colleges by appending
