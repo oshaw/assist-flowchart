@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "client": "cd client && yarn start",
-    "server": "nodemon server",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
+    "server": "nodemon server",
     "test": "mocha ./node --recursive --harmony"
   },
   "repository": {

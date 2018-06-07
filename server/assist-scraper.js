@@ -22,15 +22,12 @@ let parseYears = function ($) {
   return output
 }
 let parseDestinations = function ($) {
-  let output = []
+  let output = {}
   $('select').each(function (i, select) {
     if ($(this).attr('name') === 'oia') {
       $(this).children().each(function (j, option) {
         if ($(this).attr('value')) {
-          output.push({
-            name: $(this).text().substring(21).trim(),
-            path: $(this).attr('value').match('oia=(.*)&')[1]
-          })
+          output[$(this).text().substring(21).trim()] = $(this).attr('value').match('oia=(.*)&')[1];
         }
       })
     }
@@ -38,15 +35,12 @@ let parseDestinations = function ($) {
   return output
 }
 let parseMajors = function ($) {
-  let output = []
+  let output = {}
   $('select').each(function (i, select) {
     if ($(this).attr('name') === 'dora') {
       $(this).children().each(function (j, option) {
         if ($(this).attr('value') && $(this).attr('value') !== '-1') {
-          output.push({
-            name: $(this).text().trim(),
-            path: $(this).attr('value')
-          })
+          output[$(this).text().trim()] = $(this).attr('value')
         }
       })
     }

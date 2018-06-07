@@ -48,11 +48,15 @@ export default class SearchableDropdownSelect extends React.Component {
     }
     this.state = {
       entriesTrie: entriesTrie,
-      matches: {},
+      results: {},
+      query: '',
     };
   }
-  onMatchSelect(code) {
-    console.log(code);
+  onEntrySelect(labelSelected) {
+    this.setState({
+      query: labelSelected,
+    });
+    this.props.onEntrySelect(this.state.results[labelSelected]);
   }
   onQueryBoxDeselect() {
     setTimeout( // Matches only shown when query box focused, but to select match, query box is blurred. Timeout solves race condition
@@ -72,20 +76,17 @@ export default class SearchableDropdownSelect extends React.Component {
     }
   }
   onQueryChange(event) {
-    if (event.target.value.length === 0) {
-      this.setState({
-        matches: {},
-        query: event.target.value,
-        selected: false,
-      });
+    const query = event.target.value;
+    let results = {};
+    if (query.length !== 0) {
+      results = trieSearch(this.state.entriesTrie, event.target.value);
     }
-    else if (this.state.query !== event.target.value) {
-      this.setState({
-        matches: trieSearch(this.state.entriesTrie, event.target.value),
-        query: event.target.value,
-        selected: true,
-      });
-    }
+    const selected = (query.length !== 0 && Object.keys(results).length !== 0 && this.state.query !== query);
+    this.setState({
+      results: results,
+      query: query,
+      selected: selected,
+    });
   }
   render() {
     return (
@@ -95,11 +96,13 @@ export default class SearchableDropdownSelect extends React.Component {
           onBlur={this.onQueryBoxDeselect.bind(this)}
           onChange={this.onQueryChange.bind(this)}
           onFocus={this.onQueryBoxSelect.bind(this)}
+          placeholder={this.props.placeholder}
           type="text"
+          value={this.state.query}
         />
         {this.state.selected && <select multiple className="form-control">
-          {Object.keys(this.state.matches).map((key, index) => (
-            <option key={index} onClick={() => this.onMatchSelect(this.state.matches[key])}>{key}</option>
+          {Object.keys(this.state.results).map((label, index) => (
+            <option key={index} onClick={() => this.onEntrySelect(label)}>{label}</option>
           ))}
         </select>}
       </div>
