@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Form from './components/Form';
+import Graph from './components/Graph';
 import './index.css';
 
-class App extends React.Component {
-  render() {
-    return (
-      <p>Hello</p>
-    );
-  }
-};
-
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(
+  <div>
+    <Form />
+    <Graph />
+  </div>
+  , document.getElementById('root')
+);

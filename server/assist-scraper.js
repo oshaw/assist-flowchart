@@ -2,13 +2,10 @@
 const request = require('./request.js')
 
 let parseOrigins = function ($) {
-  let output = []
+  let output = {}
   $('option').each(function (i, option) {
     if ($(this).attr('value') !== '') {
-      output.push({
-        name: $(this).text(),
-        path: $(this).attr('value').substring(0, $(this).attr('value').indexOf('.'))
-      })
+      output[$(this).text()] = $(this).attr('value').substring(0, $(this).attr('value').indexOf('.'));
     }
   })
   return output
