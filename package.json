@@ -2,10 +2,11 @@
   "name": "assister",
   "version": "0.3.0",
   "description": "Create flowcharts out of assist.org's articulation agreements",
-  "main": "node.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon node.js",
-    "start": "node node",
+    "client": "cd client && yarn start",
+    "server": "nodemon server",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
     "test": "mocha ./node --recursive --harmony"
   },
   "repository": {
@@ -24,5 +25,8 @@
     "mocha": "^5.2.0",
     "path": "^0.12.7",
     "request": "^2.81.0"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.0"
   }
 }
