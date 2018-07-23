@@ -1,13 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Form from './components/Form';
-import Graph from './components/Graph';
-import './index.css';
+import App from './components/App.js';
 
 ReactDOM.render(
   <div>
-    <Form />
-    <Graph />
+    <App />
   </div>
   , document.getElementById('root')
 );
