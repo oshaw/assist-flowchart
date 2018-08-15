@@ -3,7 +3,6 @@ import Form from './App/Form';
 import Graph from './App/Graph';
 import {callAPI} from '../utils';
 
-
 export default class App extends React.Component {
   constructor(props) {
     super(props);

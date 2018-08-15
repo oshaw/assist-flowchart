@@ -6,3 +6,12 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+.circle {
+  background-color: lightblue;
+  border-radius: 50px;
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+  vertical-align: middle;
+  width: 100px;
+}
