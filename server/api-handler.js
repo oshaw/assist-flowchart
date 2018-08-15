@@ -58,11 +58,11 @@ module.exports = function (query, callback, error) {
       assist.getAgreement(query.origin, query.destination, query.year, query.major, function (data) {
         if (query.origin === 'DIABLO') {
           appendPrerequisites(parser(data.agreement), function (plan) {
-            callback(plan)
-          })
+            callback(plan);
+          });
         }
         else {
-          callback(parser(data.agreement))
+          callback(parser(data.agreement));
         }
       })
       break
