@@ -32,7 +32,7 @@ export default class App extends React.Component {
     return (
       <div>
         <Form onGetAgreement={this.onGetAgreement.bind(this)} />
-        {this.state.agreement ?
+        {(this.state.agreement.required.length || this.state.agreement.recommended.length) ?
           <Graph agreement={this.state.agreement} />
         : null}
       </div>
