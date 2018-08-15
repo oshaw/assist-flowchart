@@ -12,6 +12,11 @@ export default class Form extends React.Component {
         years: [],
         majors: {},
       },
+      queries: {
+        origin: '',
+        destination: '',
+        major: '',
+      },
       selected: {
         origin: '',
         destination: '',
@@ -29,7 +34,10 @@ export default class Form extends React.Component {
   }
   onOptionSelect(fieldChanged, newValue) {
     if (this.state.selected[fieldChanged] !== newValue) {
-      const newState = Object.assign(this.state, {});
+      const newState = Object.assign(this.state);
+      if (this.state.queries.hasOwnProperty(fieldChanged)) {
+        newState.queries[fieldChanged] = this.state.data[fieldChanged + 's'][newValue];
+      }
       switch (fieldChanged) {
         case 'origin': {
           delete newState.selected.destination;
@@ -92,6 +100,11 @@ export default class Form extends React.Component {
       this.setState(newState);
     }
   }
+  onQueryChange(fieldChanged, newQuery) {
+    const newState = Object.assign(this.state);
+    newState.queries[fieldChanged] = newQuery;
+    this.setState(newState);
+  }
   render() {
     const FIELDS = Object.freeze([
       'origin',
@@ -119,9 +132,11 @@ export default class Form extends React.Component {
             (this.state.data[field + 's'] && Object.keys(this.state.data[field + 's']).length) ?
               (<SearchableDropdownSelect
                 key={index}
+                onQueryChange={(newQuery) => this.onQueryChange(field, newQuery)}
+                onSelect={(payload) => this.onOptionSelect(field, payload)}
                 options={this.state.data[field + 's']}
                 placeholder={capitalize(field)}
-                onSelect={(payload) => this.onOptionSelect(field, payload)}
+                query={this.state.queries[field]}
                 selected={this.state.selected[field]}
               />) : null
           )

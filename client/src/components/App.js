@@ -2,8 +2,6 @@ import React from 'react';
 import Form from './app/Form';
 import Graph from './app/Graph';
 
-
-
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -12,6 +10,7 @@ export default class App extends React.Component {
     };
   }
   onGetAgreement(agreement) {
+    console.log(agreement);
     this.setState({
       agreement: agreement
     });

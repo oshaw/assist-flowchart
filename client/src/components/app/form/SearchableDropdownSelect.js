@@ -1,10 +1,11 @@
 import React from 'react';
+import lodash from 'lodash';
 
 class Trie {
   constructor(input) {
     this.root = {};
     for (const key in input) {
-      this.add(root, key, input[key]);
+      this.add(root, input[key], key);
     }
   }
   add(trie, string, code) {
@@ -58,72 +59,48 @@ export default class SearchableDropdownSelect extends React.Component {
         results: this.props.options,
         selected: this.props.selected,
       },
-      view: {
-        focused: false,
-        query: '',
-      }
+      focused: false,
     };
-  }
-  onSelect(labelSelected) {
-    const newData = Object.assign(this.state.data);
-    const newView = Object.assign(this.state.view);
-    newData.selected = this.state.data.results[labelSelected];
-    newView.query = labelSelected;
-    this.setState({
-      data: newData,
-      view: newView,
-    });
-    this.props.onSelect(this.state.data.results[labelSelected]);
   }
   onBlur() {
     // Matches only shown when query box focused, but to select match, query box is blurred. Timeout solves race condition
     setTimeout(
       () => {
-        const newView = Object.assign(this.state.view);
-        newView.focused = false;
         this.setState({
-          view: newView,
+          focused: false,
         });
       },
       120 // Tested to be delay needed for an option onClick to trigger
     );
   }
   onFocus(event) {
-    const newView = Object.assign(this.state.view);
-    newView.focused = true;
     this.setState({
-      view: newView,
+      focused: true,
     });
+  }
+  onSelect(labelSelected) {
+    const newData = Object.assign(this.state.data);
+    newData.selected = lodash.findKey(this.state.data.results, (result) => result === labelSelected);
+    this.setState({
+      data: newData,
+    });
+    this.props.onSelect(this.state.data.selected);
   }
   onSearch(event) {
     const newData = Object.assign(this.state.data);
-    const newView = Object.assign(this.state.view);
-    newView.query = event.target.value;
     newData.results = {};
-    if (newView.query.length !== 0) {
-      newData.results = this.state.data.options.search(newView.query);
+    this.props.onQueryChange(event.target.value);
+    if (this.props.query.length !== 0) {
+      newData.results = this.state.data.options.search(this.props.query);
     }
     else {
       newData.results = this.props.options; // Empty query returns everything
     }
-    newView.focused = (newView.query.length !== 0 && Object.keys(newData.results).length !== 0 && this.state.view.query !== newView.query);
     this.setState({
       data: newData,
-      view: newView,
     });
   }
   render() {
-    if (this.props.selected !== this.state.data.selected) {
-      const newData = Object.assign(this.state.data);
-      const newView = Object.assign(this.state.view);
-      newData.selected = this.props.selected;
-      newData.options = this.props.options;
-      newView.query = this.props.selected ? this.props.options[this.props.selected] : '';
-      this.setState({
-        data: newData,
-        view: newView
-      });
-    }
     return (
       <div className="input-group">
         {/* Search box */}
@@ -134,14 +111,19 @@ export default class SearchableDropdownSelect extends React.Component {
           onFocus={this.onFocus.bind(this)}
           placeholder={this.props.placeholder}
           type="text"
-          value={this.state.view.query}
+          value={this.props.query}
         />
         {/* Results */}
-        {this.state.view.focused && <select multiple className="form-control">
-          {Object.keys(this.state.data.results).map((label, index) => (
-            <option key={index} onClick={() => this.onSelect(label)}>{label}</option>
-          ))}
-        </select>}
+        {this.state.focused &&
+          <select multiple className="form-control">
+            {Object.values(this.state.data.results).map((label, index) => (
+              <option
+                key={index}
+                onClick={() => this.onSelect(label)}
+              >{label}</option>
+            ))}
+          </select>
+        }
       </div>
     );
   }
