@@ -1,5 +1,5 @@
 import React from 'react';
-import SearchableDropdownSelect from './form/SearchableDropdownSelect';
+import SearchableDropdownSelect from './Form/SearchableDropdownSelect';
 import {callAPI, capitalize} from './../../utils';
 
 export default class Form extends React.Component {
