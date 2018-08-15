@@ -113,10 +113,10 @@ let resolveDestinationAndOriginName = function (origin, destination, year, callb
 }
 
 module.exports = {
-  getOrigins: getOrigins,
-  getDestinationsAndYears: getDestinationsAndYears,
-  getMajors: getMajors,
-  getAgreement: getAgreement,
-  resolveOriginName: resolveOriginName,
-  resolveDestinationAndOriginName: resolveDestinationAndOriginName
+  getOrigins,
+  getDestinationsAndYears,
+  getMajors,
+  getAgreement,
+  resolveOriginName,
+  resolveDestinationAndOriginName,
 }
