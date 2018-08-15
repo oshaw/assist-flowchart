@@ -3,7 +3,7 @@ import * as dagre from 'dagre-d3';
 import * as d3 from 'd3';
 
 class DagreGraph {
-  constructor(svg, g, render) {
+  constructor(svg, g, draw) {
     this.graph = new dagre.graphlib.Graph().setGraph({});
     this.renderer = new dagre.render();
     // Dagre requires access to <svg> and <g> in DOM (this.svg, this.svg)
@@ -16,22 +16,11 @@ class DagreGraph {
       svg: d3.select(svg),
       g: d3.select(g),
     }
-    render(this.graph);
+  }
+  render() {
+    // Do the rendering
     this.renderer(this.selections.g, this.graph);
-    this.fit();
-    this.center();
-  }
-  center() {
-    const dimensions = {
-      current: this.graph.graph(),
-    }
-    const offset = {
-      x: (this.selections.svg.attr('width') - dimensions.current.width) / 2,
-    }
-    this.selections.g.attr('transform', `translate(${offset.x}, 20)`);
-    this.selections.svg.attr('height', dimensions.current.height + 40);
-  }
-  fit() {
+    // Fit
     const dimensions = {
       current: this.graph.graph(),
       desired: this.elements.svg.getBBox(),
@@ -43,6 +32,32 @@ class DagreGraph {
     this.selections.svg.attr('height', dimensions.desired.height);
     this.selections.svg.attr('width', dimensions.desired.width);
     this.selections.g.attr('transform', d3.zoomIdentity.translate(transform.x, transform.y));
+  }
+}
+
+class DagreGraphAgreementFlowchart extends DagreGraph {
+  constructor(svg, g, agreement) {
+    super(svg, g);
+    this.renderCourseList([...agreement.required, ...agreement.recommended]);
+    this.render();
+  }
+  renderCourseList(list) {
+    list.forEach((pair, index) => {
+      // Requirement satisfied by single course
+      if (pair.course && pair.course.id) {
+        this.graph.setNode(pair.course.id, {
+          label: pair.course.id,
+        });
+      }
+      // Requirement satisfied by multiple courses
+      else if (pair.course && pair.relationship) {
+        this.renderCourseList(pair.parts);
+      }
+      // Requirement not articulated
+      else {
+        
+      }
+    });
   }
 }
 
@@ -59,7 +74,6 @@ export default class Flowchart extends React.Component {
   componentDidUpdate() {
     this.renderDagreGraph();
   }
-  
   render() {
     return (
       <svg id='dagreGraph' ref={(ref) => {this.dagreGraph.elements.svg = ref}}>
@@ -68,18 +82,34 @@ export default class Flowchart extends React.Component {
     );
   }
   renderDagreGraph() {
-    this.dagreGraph = new DagreGraph(
+    this.dagreGraph = new DagreGraphAgreementFlowchart(
       this.dagreGraph.elements.svg,
       this.dagreGraph.elements.g,
-      (graph) => {
-        this.props.agreement.required.forEach((pair, index) => {
-          if (pair.course && pair.course.id) {
-            graph.setNode(pair.course.id, {
-              label: pair.course.id,
-            });
-          }
-        });
-      }
+      this.props.agreement,
     );
+    // this.dagreGraph = new DagreGraph(
+    //   this.dagreGraph.elements.svg,
+    //   this.dagreGraph.elements.g,
+    //   (graph) => this.drawInDagreGraph(graph)
+    // );
   }
+  // drawInDagreGraph(graph) {
+  //   const agreement = this.props.agreement;
+  //   [...agreement.required, ...agreement.recommended].forEach((pair, index) => {
+  //     // Requirement satisfied by single course
+  //     if (pair.course && pair.course.id) {
+  //       graph.setNode(pair.course.id, {
+  //         label: pair.course.id,
+  //       });
+  //     }
+  //     // Requirement satisfied by multiple courses
+  //     else if (pair.course && pair.relationship) {
+        
+  //     }
+  //     // Requirement not articulated
+  //     else {
+        
+  //     }
+  //   });
+  // }
 };
