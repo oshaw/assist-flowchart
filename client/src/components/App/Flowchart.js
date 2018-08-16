@@ -1,10 +1,21 @@
 import React from 'react';
-import * as dagre from 'dagre-d3';
-import * as d3 from 'd3';
+import {AGREEMENT_PAIR_TYPES, determineAgreementPairType} from './../../utils';
+const d3 = window.d3;
+const dagre = window.dagreD3;
+
+
+const COURSE_RELATIONSHIPS = Object.freeze({
+  prerequisite: 'prerequisite',
+  recommended: 'recommended',
+});
+const COURSE_NECESSITIES = Object.freeze({
+  recommended: 'recommended',
+  required: 'required',
+});
 
 class DagreGraph {
   constructor(svg, g, draw) {
-    this.graph = new dagre.graphlib.Graph().setGraph({});
+    this.graph = new dagre.graphlib.Graph().setGraph({}).setDefaultEdgeLabel(() => {});
     this.renderer = new dagre.render();
     // Dagre requires access to <svg> and <g> in DOM (this.svg, this.svg)
     this.elements = {
@@ -18,7 +29,7 @@ class DagreGraph {
     }
   }
   render() {
-    // Do the rendering
+    // Do the actual rendering
     this.renderer(this.selections.g, this.graph);
     // Fit
     const dimensions = {
@@ -34,33 +45,95 @@ class DagreGraph {
     this.selections.g.attr('transform', d3.zoomIdentity.translate(transform.x, transform.y));
   }
 }
-
-class DagreGraphAgreementFlowchart extends DagreGraph {
+class DagreGraphAssistAgreementFlowchart extends DagreGraph {
   constructor(svg, g, agreement) {
     super(svg, g);
-    this.renderCourseList([...agreement.required, ...agreement.recommended]);
+    this.agreement = agreement;
+    // Dagre D3 is apparently incapable of correctly rendering nodes with indexes which are string-based or large integers
+    // Must create lookup table as an array of courseIds where the array index is the node id
+    this.nodes = [];
+    this.renderCourses(this.agreement.recommended, COURSE_NECESSITIES.recommended);
+    this.renderCourses(this.agreement.required, COURSE_NECESSITIES.required);
     this.render();
   }
-  renderCourseList(list) {
-    list.forEach((pair, index) => {
-      // Requirement satisfied by single course
-      if (pair.course && pair.course.id) {
-        this.graph.setNode(pair.course.id, {
-          label: pair.course.id,
-        });
-      }
-      // Requirement satisfied by multiple courses
-      else if (pair.course && pair.relationship) {
-        this.renderCourseList(pair.parts);
-      }
-      // Requirement not articulated
-      else {
-        
+  getNodeId(courseId) {
+    return this.nodes.findIndex((potentialCourseId) => potentialCourseId === courseId);
+  }
+  renderCourse(course) {
+    if (this.getNodeId(course.id) === -1) {
+      this.graph.setNode(this.nodes.length, {
+        label: course.id,
+      });
+      this.nodes.push(course.id);
+    }
+  }
+  renderCourseRelationship(courseFrom, courseTo, relation) {
+    let nodeFromId = this.getNodeId(courseFrom.id);
+    let nodeToId = this.getNodeId(courseTo.id);
+    if (nodeFromId === -1) {
+      this.renderCourse(courseFrom);
+      nodeFromId = this.getNodeId(courseFrom.id);
+    }
+    if (this.getNodeId(courseTo.id) === -1) {
+      this.renderCourse(courseTo);
+      nodeToId = this.getNodeId(courseTo.id);
+    }
+    // this.graph.setEdge(nodeFromId, nodeToId);
+    console.log(this.graph.edges());
+    console.log(this.graph.edge({
+      v: nodeFromId,
+      w: nodeToId,
+    }));
+  }
+  renderCourses(pairs, necessity) {
+    pairs.forEach((pair) => {
+      const pairType = determineAgreementPairType(pair);
+      switch (pairType) {
+        case AGREEMENT_PAIR_TYPES.singleCourse: {
+          this.renderPair(pair);
+          break;
+        }
+        case AGREEMENT_PAIR_TYPES.multipleCourses: {
+          this.renderCourses(pair.course.parts);
+          break;
+        }
+        case AGREEMENT_PAIR_TYPES.multiplePairs: {
+          this.renderCourses(pair.parts);
+          break;
+        }
+        case AGREEMENT_PAIR_TYPES.notArticulated: {
+          this.renderNotArticulated(pair);
+          break;
+        }
       }
     });
   }
+  renderNotArticulated(pair) {
+    this.graph.setNode(this.nodes.length, {
+      label: `No courses articulated for ${pair.equals.id}`,
+    });
+  }
+  renderPair(pair) {
+    this.renderCourse(pair.course);
+    if (pair.course.prerequisites) {
+      pair.course.prerequisites.forEach((prerequisite) => {
+        prerequisite = prerequisite.replace(/-/, ' ');
+        this.renderCourse({id: prerequisite});
+        this.renderCourseRelationship(pair.course, {id: prerequisite}, COURSE_RELATIONSHIPS.prerequisite);
+      });
+    }
+    if (pair.course.recommended) {
+      pair.course.recommended.forEach((recommended) => {
+        recommended = recommended.replace(/-/, ' ');
+        this.renderCourse({id: recommended});
+        this.renderCourseRelationship(pair.course, {id: recommended}, COURSE_RELATIONSHIPS.recommended);
+      });
+    }
+  }
 }
-
+class DagreGraphAssistAgreementCourse {
+  
+}
 export default class Flowchart extends React.Component {
   constructor(props) {
     super(props);
@@ -82,34 +155,10 @@ export default class Flowchart extends React.Component {
     );
   }
   renderDagreGraph() {
-    this.dagreGraph = new DagreGraphAgreementFlowchart(
+    this.dagreGraph = new DagreGraphAssistAgreementFlowchart(
       this.dagreGraph.elements.svg,
       this.dagreGraph.elements.g,
       this.props.agreement,
     );
-    // this.dagreGraph = new DagreGraph(
-    //   this.dagreGraph.elements.svg,
-    //   this.dagreGraph.elements.g,
-    //   (graph) => this.drawInDagreGraph(graph)
-    // );
   }
-  // drawInDagreGraph(graph) {
-  //   const agreement = this.props.agreement;
-  //   [...agreement.required, ...agreement.recommended].forEach((pair, index) => {
-  //     // Requirement satisfied by single course
-  //     if (pair.course && pair.course.id) {
-  //       graph.setNode(pair.course.id, {
-  //         label: pair.course.id,
-  //       });
-  //     }
-  //     // Requirement satisfied by multiple courses
-  //     else if (pair.course && pair.relationship) {
-        
-  //     }
-  //     // Requirement not articulated
-  //     else {
-        
-  //     }
-  //   });
-  // }
 };

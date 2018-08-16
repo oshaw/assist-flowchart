@@ -1,6 +1,6 @@
-node_modules
-semantic
 *.txt
 *.min.js
-npm-debug.log
+.ignore
 .vscode
+node_modules
+npm-debug.log
