@@ -11,8 +11,8 @@ const COURSE_NECESSITIES = Object.freeze({
 });
 
 export default class AssistAgreementFlowchart extends Graph {
-  constructor(svg, agreement) {
-    super(svg);
+  constructor(svg, gToSelect, agreement) {
+    super(svg, gToSelect);
     // Dagre D3 is apparently incapable of correctly rendering nodes with indexes that are string-based or large integers
     // Must create lookup table as an array of courseIds where the array index is the node id
     this.nodes = [];
