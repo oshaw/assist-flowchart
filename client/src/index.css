@@ -9,3 +9,7 @@ body {
 rect {
   fill: lightblue;
 }
+.edgePath path {
+  stroke: #333;
+  stroke-width: 1.5px;
+}

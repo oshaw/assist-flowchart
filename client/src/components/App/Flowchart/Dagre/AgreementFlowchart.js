@@ -11,12 +11,12 @@ const COURSE_NECESSITIES = Object.freeze({
 });
 
 export default class AssistAgreementFlowchart extends Graph {
-  constructor(svg, g, agreement) {
-    super(svg, g);
-    this.agreement = agreement;
-    // Dagre D3 is apparently incapable of correctly rendering nodes with indexes which are string-based or large integers
+  constructor(svg, agreement) {
+    super(svg);
+    // Dagre D3 is apparently incapable of correctly rendering nodes with indexes that are string-based or large integers
     // Must create lookup table as an array of courseIds where the array index is the node id
     this.nodes = [];
+    this.agreement = agreement;
     this.renderCourses(this.agreement.recommended, COURSE_NECESSITIES.recommended);
     this.renderCourses(this.agreement.required, COURSE_NECESSITIES.required);
     this.render();
@@ -25,7 +25,7 @@ export default class AssistAgreementFlowchart extends Graph {
     return this.nodes.findIndex((potentialCourseId) => potentialCourseId === courseId);
   }
   renderCourse(course) {
-    if (this.getNodeId(course.id) === -1) {
+    if (this.getNodeId(course.id) === -1 && course.id !== '') {
       this.graph.setNode(this.nodes.length, {
         label: course.id,
       });
@@ -43,12 +43,7 @@ export default class AssistAgreementFlowchart extends Graph {
       this.renderCourse(courseTo);
       nodeToId = this.getNodeId(courseTo.id);
     }
-    // this.graph.setEdge(nodeFromId, nodeToId);
-    console.log(this.graph.edges());
-    console.log(this.graph.edge({
-      v: nodeFromId,
-      w: nodeToId,
-    }));
+    this.graph.setEdge(nodeToId, nodeFromId);
   }
   renderCourses(pairs, necessity) {
     pairs.forEach((pair) => {

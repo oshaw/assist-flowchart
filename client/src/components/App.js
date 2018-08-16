@@ -207,8 +207,7 @@ const agreement = {
             "name": "Principles of Cellular and Molecular Biology",
             "units": 5,
             "prerequisites": [
-              "CHEM-120",
-              ""
+              "CHEM-120"
             ],
             "recommended": [
               "BIOSC-101",

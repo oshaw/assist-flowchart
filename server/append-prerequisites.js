@@ -8,6 +8,7 @@ const parsePrerequisites = function (string) {
                .replace(/\s+/g, ' ')
                .trim()
                .split('~')
+               .filter((prerequisite) => prerequisite !== '');
 }
 const appendPrerequisites = function (course, callback) {
   const url = 'http://www3.dvc.edu/org/info/course-outlines/'
