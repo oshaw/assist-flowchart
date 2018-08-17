@@ -1,15 +1,39 @@
-* {
-  /* width: 100%; */
-}
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
 }
+svg {
+  padding: 5px;
+}
+
+.course text {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 rect {
-  fill: lightblue;
+  border-radius: 5px;
+  fill: rgba(0, 0, 0, 0);
+  stroke: black;
+  stroke-width: 1px;
 }
+.required rect {
+  
+}
+.recommended rect {
+  stroke-dasharray: 3px;
+  stroke-linecap: round;
+}
+
 .edgePath path {
   stroke: #333;
-  stroke-width: 1.5px;
+  stroke-width: 1px;
+}
+.edgePath.required path {
+  
+}
+.edgePath.recommended path {
+  stroke-dasharray: 3px;
+  stroke-linecap: round;
 }

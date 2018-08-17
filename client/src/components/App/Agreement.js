@@ -1,7 +1,7 @@
-import AgreementFlowchart from './Flowchart/Dagre/AgreementFlowchart';
+import Flowchart from './Agreement/Dagre/Flowchart';
 import React from 'react';
 
-export default class Flowchart extends React.Component {
+export default class Agreement extends React.Component {
   constructor(props) {
     super(props);
     this.dagreGraph = {
@@ -22,7 +22,7 @@ export default class Flowchart extends React.Component {
     );
   }
   renderDagreGraph() {
-    this.agreementFlowchart = new AgreementFlowchart(
+    this.flowchart = new Flowchart(
       this.dagreGraph.elements.svg,
       this.dagreGraph.elements.gToSelect,
       this.props.agreement,

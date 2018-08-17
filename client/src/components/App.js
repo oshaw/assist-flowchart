@@ -1,6 +1,6 @@
 import React from 'react';
 import Form from './App/Form';
-import Flowchart from './App/Flowchart';
+import Agreement from './App/Agreement';
 
 const agreement = {
   "required": [
@@ -531,7 +531,7 @@ export default class App extends React.Component {
       <div>
         <Form onGetAgreement={this.onGetAgreement.bind(this)} />
         {(this.state.agreement.required.length || this.state.agreement.recommended.length) ?
-          <Flowchart agreement={this.state.agreement} />
+          <Agreement agreement={this.state.agreement} />
         : null}
       </div>
     );
