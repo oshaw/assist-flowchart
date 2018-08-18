@@ -137,7 +137,7 @@ const agreement = {
           "ENGL-116",
           "ENGL-117",
           "ESL-117A",
-          "reading\/writing assessment"
+          "reading/writing assessment"
         ]
       },
       "equals": {
@@ -465,7 +465,7 @@ const agreement = {
     {
       "course": {
         "id": "COMSC 260",
-        "name": "Assembly Language Programming\/Computer Organization",
+        "name": "Assembly Language Programming/Computer Organization",
         "units": 4,
         "prerequisites": [
           "COMSC-165"

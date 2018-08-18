@@ -1,3 +1,4 @@
+import {capitalize} from './../../../../utils';
 const d3 = window.d3;
 const dagre = window.dagreD3;
 
@@ -57,6 +58,7 @@ export default class Graph {
         nodeToId = this.getNodeId(labelTo);
       }
       const options = {}
+      // eslint-disable-next-line
       if (classes != undefined) {
         options.class = createClassesString(classes);
       }
@@ -68,6 +70,7 @@ export default class Graph {
       const options = {
         label,
       }
+      // eslint-disable-next-line
       if (classes != undefined) {
         options.class = createClassesString(classes);
       }
@@ -75,10 +78,9 @@ export default class Graph {
     }
   }
   getNodeId(label) {
-    return Object.values(this.graph._nodes).findIndex((node) => node && node.label === label);
+    return Object.values(this.graph._nodes).findIndex((node) => node && node.label === capitalize(label));
   }
   render() {
-    // this.removeMalformedNodes();
     this.roundNodeCorners();
     this.renderer(this.selections.g, this.graph);
     this.center();
@@ -108,17 +110,6 @@ export default class Graph {
     this.graph.nodes().forEach((nodeId) => {
       const node = this.graph.node(nodeId);
       node.rx = node.ry = 2;
-    });
-  }
-  removeMalformedNodes() {
-    // Dagre has a bug where a node with a -1 index and an undefined body is added
-    // Remove this node to prevent render errors
-    Object.entries(this.graph._nodes).forEach((entry) => {
-      const index = entry[0];
-      const node = entry[1];
-      if (node == undefined || index === -1) {
-        delete this.graph._nodes[index];
-      }
     });
   }
 }

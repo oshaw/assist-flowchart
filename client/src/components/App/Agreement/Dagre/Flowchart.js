@@ -40,6 +40,7 @@ export default class Flowchart extends Graph {
           this.renderNotArticulated(pair, necessity);
           break;
         }
+        default: {}
       }
     });
   }
