@@ -18,7 +18,9 @@ export const callAPI = (endpoint, body) => {
 }
 
 export const capitalize = (string) => {
-  return string[0].toUpperCase() + string.substring(1);
+  if (string) {
+    return string[0].toUpperCase() + string.substring(1);
+  }
 }
 
 export const AGREEMENT_PAIR_TYPES = Object.freeze({

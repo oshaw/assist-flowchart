@@ -1,6 +1,15 @@
 const d3 = window.d3;
 const dagre = window.dagreD3;
 
+const createClassesString = (classes) => {
+  if (Array.isArray(classes)) {
+    return classes.join(' ');
+  }
+  else if (typeof classes === 'string') {
+    return classes;
+  }
+}
+
 export default class Graph {
   constructor(svg, gToSelect) {
     this.graph = this.createGraph();
@@ -35,12 +44,42 @@ export default class Graph {
     // And also the element of a newly created <g> element
     this.selections.g = d3.select(gToSelect);
   }
+  createEdge(labelFrom, labelTo, classes) {
+    if (labelFrom.trim() !== '' && labelTo.trim() !== '') {
+      let nodeFromId = this.getNodeId(labelFrom);
+      let nodeToId = this.getNodeId(labelTo);
+      if (nodeFromId === -1) {
+        this.createNode(labelFrom, classes);
+        nodeFromId = this.getNodeId(labelFrom);
+      }
+      if (nodeToId === -1) {
+        this.createNode(labelTo, classes);
+        nodeToId = this.getNodeId(labelTo);
+      }
+      const options = {}
+      if (classes != undefined) {
+        options.class = createClassesString(classes);
+      }
+      this.graph.setEdge(nodeFromId, nodeToId, options);
+    }
+  }
+  createNode(label, classes) {
+    if (label !== '' && this.getNodeId(label) === -1) {
+      const options = {
+        label,
+      }
+      if (classes != undefined) {
+        options.class = createClassesString(classes);
+      }
+      this.graph.setNode(this.graph._nodeCount, options);
+    }
+  }
+  getNodeId(label) {
+    return Object.values(this.graph._nodes).findIndex((node) => node && node.label === label);
+  }
   render() {
-    // Round the corners of the nodes
-    this.graph.nodes().forEach((nodeId) => {
-      const node = this.graph.node(nodeId);
-      node.rx = node.ry = 2;
-    });
+    // this.removeMalformedNodes();
+    this.roundNodeCorners();
     this.renderer(this.selections.g, this.graph);
     this.center();
     this.fit();
@@ -64,5 +103,22 @@ export default class Graph {
     this.selections.svg.attr('height', dimensions.desired.height);
     this.selections.svg.attr('width', dimensions.desired.width);
     this.selections.g.attr('transform', d3.zoomIdentity.translate(transform.x, transform.y));
+  }
+  roundNodeCorners() {
+    this.graph.nodes().forEach((nodeId) => {
+      const node = this.graph.node(nodeId);
+      node.rx = node.ry = 2;
+    });
+  }
+  removeMalformedNodes() {
+    // Dagre has a bug where a node with a -1 index and an undefined body is added
+    // Remove this node to prevent render errors
+    Object.entries(this.graph._nodes).forEach((entry) => {
+      const index = entry[0];
+      const node = entry[1];
+      if (node == undefined || index === -1) {
+        delete this.graph._nodes[index];
+      }
+    });
   }
 }

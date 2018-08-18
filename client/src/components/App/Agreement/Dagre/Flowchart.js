@@ -1,12 +1,7 @@
 import {AGREEMENT_PAIR_TYPES, capitalize, determineAgreementPairType} from './../../../../utils';
 import Graph from './Graph';
 
-const COURSE_RELATIONSHIPS = Object.freeze({
-  prerequisite: 'prerequisite',
-  recommended: 'recommended',
-});
 const COURSE_NECESSITIES = Object.freeze({
-  prerequisite: 'prerequisite',
   recommended: 'recommended',
   required: 'required',
 });
@@ -14,40 +9,16 @@ const COURSE_NECESSITIES = Object.freeze({
 export default class Flowchart extends Graph {
   constructor(svg, gToSelect, agreement) {
     super(svg, gToSelect);
-    // Dagre D3 does not support node indexes that are string-based or large integers
-    // Must create lookup table as array of courseIds where array index is node id
-    this.nodes = [];
     this.agreement = agreement;
     this.renderCourses(this.agreement.recommended, COURSE_NECESSITIES.recommended);
     this.renderCourses(this.agreement.required, COURSE_NECESSITIES.required);
     this.render();
   }
-  getNodeId(courseId) {
-    return this.nodes.findIndex((potentialCourseId) => potentialCourseId === courseId);
-  }
   renderCourse(course, necessity) {
-    if (this.getNodeId(course.id) === -1 && course.id !== '') {
-      this.graph.setNode(this.nodes.length, {
-        class: `${necessity} course`,
-        label: capitalize(course.id),
-      });
-      this.nodes.push(course.id);
-    }
+    this.createNode(capitalize(course.id), [necessity, 'course']);
   }
   renderCourseRelationship(courseFrom, courseTo, relation) {
-    let nodeFromId = this.getNodeId(courseFrom.id);
-    let nodeToId = this.getNodeId(courseTo.id);
-    if (nodeFromId === -1) {
-      this.renderCourse(courseFrom);
-      nodeFromId = this.getNodeId(courseFrom.id);
-    }
-    if (this.getNodeId(courseTo.id) === -1) {
-      this.renderCourse(courseTo);
-      nodeToId = this.getNodeId(courseTo.id);
-    }
-    this.graph.setEdge(nodeToId, nodeFromId, {
-      class: relation,
-    });
+    this.createEdge(courseFrom.id, courseTo.id, relation);
   }
   renderCourses(pairs, necessity) {
     pairs.forEach((pair) => {
@@ -73,25 +44,26 @@ export default class Flowchart extends Graph {
     });
   }
   renderNotArticulated(pair, necessity) {
-    this.graph.setNode(this.nodes.length, {
-      class: `${necessity} not-articulated`,
-      label: `No courses articulated for ${pair.equals.id}`,
-    });
+    this.createNode(`No courses articulated for ${pair.equals.id}`, [necessity, 'not-articulated']);
   }
   renderPair(pair, necessity) {
     this.renderCourse(pair.course, necessity);
     if (pair.course.prerequisites) {
       pair.course.prerequisites.forEach((prerequisite) => {
-        prerequisite = prerequisite.replace(/-/, ' ');
-        this.renderCourse({id: prerequisite}, COURSE_NECESSITIES.prerequisite);
-        this.renderCourseRelationship(pair.course, {id: prerequisite}, COURSE_RELATIONSHIPS.prerequisite);
+        prerequisite = {
+          id: prerequisite.replace(/-/, ' '),
+        }
+        this.renderCourse(prerequisite, COURSE_NECESSITIES.prerequisite);
+        this.renderCourseRelationship(prerequisite, pair.course, COURSE_NECESSITIES.required);
       });
     }
     if (pair.course.recommended) {
       pair.course.recommended.forEach((recommended) => {
-        recommended = recommended.replace(/-/, ' ');
-        this.renderCourse({id: recommended}, COURSE_NECESSITIES.recommended);
-        this.renderCourseRelationship(pair.course, {id: recommended}, COURSE_RELATIONSHIPS.recommended, COURSE_RELATIONSHIPS.recommended);
+        recommended = {
+          id: recommended.replace(/-/, ' '),
+        }
+        this.renderCourse(recommended, COURSE_NECESSITIES.recommended);
+        this.renderCourseRelationship(recommended, pair.course, COURSE_NECESSITIES.recommended);
       });
     }
   }
