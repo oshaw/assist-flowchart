@@ -1,6 +1,8 @@
 import React from 'react';
-import Form from './App/Form';
 import Agreement from './App/Agreement';
+import Footer from './App/Footer';
+import Form from './App/Form';
+import Header from './App/Header';
 
 const agreement = {
   "required": [
@@ -529,10 +531,14 @@ export default class App extends React.Component {
   render() {
     return (
       <div>
-        <Form onGetAgreement={this.onGetAgreement.bind(this)} />
-        {(this.state.agreement.required.length || this.state.agreement.recommended.length) ?
-          <Agreement agreement={this.state.agreement} />
-        : null}
+        <Header></Header>
+        <div>
+          <Form onGetAgreement={this.onGetAgreement.bind(this)} />
+          {(this.state.agreement.required.length || this.state.agreement.recommended.length) ?
+            <Agreement agreement={this.state.agreement} />
+          : null}
+        </div>
+        <Footer></Footer>
       </div>
     );
   }

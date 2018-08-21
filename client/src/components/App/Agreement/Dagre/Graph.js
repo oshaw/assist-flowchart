@@ -3,8 +3,8 @@ const d3 = window.d3;
 const dagre = window.dagreD3;
 
 const createClassesString = (classes) => {
-  if (Array.isArray(classes)) {
-    return classes.join(' ');
+  if (Array.isArray(classes) && classes.length) {
+    return classes.filter((classString) => classString && classString.trim() !== '').join(' ');
   }
   else if (typeof classes === 'string') {
     return classes;

@@ -11,6 +11,13 @@ svg {
   font-size: 14px;
   font-weight: 600;
 }
+.courseId {
+  font-size: 18px;
+  font-weight: 'bold';
+}
+.courseNameUnits {
+  font-weight: 'bold';
+}
 
 rect {
   border-radius: 5px;
