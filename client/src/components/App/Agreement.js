@@ -16,9 +16,11 @@ export default class Agreement extends React.Component {
   }
   render() {
     return (
-      <svg ref={(ref) => {this.dagreGraph.elements.svg = ref;}} width="100%">
-        <g ref={(ref) => {this.dagreGraph.elements.gToSelect = ref;}}></g>
-      </svg>
+      <div id="agreement">
+        <svg ref={(ref) => {this.dagreGraph.elements.svg = ref;}}>
+          <g ref={(ref) => {this.dagreGraph.elements.gToSelect = ref;}}></g>
+        </svg>
+      </div>
     );
   }
   renderDagreGraph() {

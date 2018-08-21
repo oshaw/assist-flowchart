@@ -113,7 +113,7 @@ export default class Form extends React.Component {
       'major',
     ]);
     return (
-      <form>
+      <form id="form">
         {FIELDS.map((field, index) => 
           (field === 'year') ? (
             (this.state.data.years.length !== 0) ?

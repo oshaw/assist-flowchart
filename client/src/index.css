@@ -2,21 +2,29 @@ body {
   margin: 0;
   padding: 0;
 }
-svg {
-  padding: 5px;
+
+text {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 300;
 }
 
 .course text {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 14px;
   font-weight: 600;
 }
-.courseId {
-  font-size: 18px;
-  font-weight: 'bold';
+
+#agreement {
+  overflow: scroll;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  width: 100%;
 }
-.courseNameUnits {
-  font-weight: 'bold';
+
+#form {
+  padding-top: 2%;
+}
+#form * {
+  width: 100%;
 }
 
 rect {

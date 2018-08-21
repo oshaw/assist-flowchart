@@ -115,7 +115,7 @@ export default class SearchableDropdownSelect extends React.Component {
         />
         {/* Results */}
         {this.state.focused &&
-          <select multiple className="form-control">
+          <select multiple className="form-control" size="30">
             {Object.values(this.state.data.results).map((label, index) => (
               <option
                 key={index}
