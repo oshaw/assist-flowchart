@@ -71,5 +71,5 @@ View the parsed agreement with
 
 For example, the following returns the agreement from Allan Hancock College to California Polytechnic University, Pomona in the academic year 15-16 for Architecture B. Arch.
 ```bash
-localhost:3000/api?endpoint=agreement&origin=AHC&destination=CPP&year=15-16&major=ARCH
+localhost:5000/api?endpoint=agreement&origin=AHC&destination=CPP&year=15-16&major=ARCH
 ```
