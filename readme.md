@@ -53,13 +53,13 @@ Fetch and parse list of origin colleges by appending
 origins
 ```
 
-View colleges with agreements with an origin college with the following, with ORIGIN as the origin's path code.
+View colleges with agreements with an origin college with the following, with `ORIGIN` as the origin's path code.
 ```bash
 .../api?endpoint=destinations&origin=ORIGIN
 ```
 
    
-View majors with the following. Set DESTINATION as destination's path code and YEAR as academic year (i.e. 16-17).
+View majors with the following. Set `DESTINATION` as destination's path code and `YEAR` as academic year (i.e. 16-17).
 ```bash
 .../api?endpoint=majors&origin=ORIGIN&destination=DESTINATION&year=YEAR
 ```
